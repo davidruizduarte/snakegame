@@ -1,0 +1,100 @@
+#Game by David Ruiz a.k.a @viajatech 
+
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# --- Game settings ---
+cell_size = 20
+grid_width = 30
+grid_height = 20
+snake_speed = 10  # Adjust for preferred difficulty
+black = (0, 0, 0)
+white = (255, 255, 255)
+red = (255, 0, 0)
+green = (0, 255, 0)
+
+# --- Game screen setup ---
+screen_width = cell_size * grid_width
+screen_height = cell_size * grid_height
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Snake Game")
+
+# --- Utility functions ---
+def draw_grid(surface):
+    for y in range(grid_height):
+        for x in range(grid_width):
+            rect = pygame.Rect(x * cell_size, y * cell_size, cell_size, cell_size)
+            pygame.draw.rect(surface, black, rect, 1)
+
+def generate_food():
+    while True:  # Ensure food isn't on the snake's body
+        food_x = random.randint(0, grid_width - 1)
+        food_y = random.randint(0, grid_height - 1)
+        if (food_x, food_y) not in snake_body:
+            return food_x, food_y
+
+# --- Snake and game logic ---
+snake_body = [(10, 10), (9, 10), (8, 10)]  # Initial body
+direction = 'RIGHT'
+food_x, food_y = generate_food()
+game_over = False
+clock = pygame.time.Clock()
+
+while not game_over:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            game_over = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT and direction != 'RIGHT':
+                direction = 'LEFT'
+            elif event.key == pygame.K_RIGHT and direction != 'LEFT':
+                direction = 'RIGHT'
+            elif event.key == pygame.K_UP and direction != 'DOWN':
+                direction = 'UP'
+            elif event.key == pygame.K_DOWN and direction != 'UP':
+                direction = 'DOWN'
+
+    # Move the snake
+    head_x, head_y = snake_body[0]
+    if direction == 'LEFT':
+        head_x -= 1
+    elif direction == 'RIGHT':
+        head_x += 1
+    elif direction == 'UP':
+        head_y -= 1
+    elif direction == 'DOWN':
+        head_y += 1
+
+    new_head = (head_x, head_y)
+
+    # Wall collision
+    if head_x < 0 or head_x >= grid_width or head_y < 0 or head_y >= grid_height:
+        game_over = True
+
+    # Tail collision
+    if new_head in snake_body[1:]:
+        game_over = True
+
+    snake_body.insert(0, new_head)
+
+    # Check for food collision
+    if head_x == food_x and head_y == food_y:
+        food_x, food_y = generate_food()
+    else:
+        snake_body.pop()  # No growth if no food
+
+    # Drawing
+    screen.fill(white)
+    draw_grid(screen)
+    for x, y in snake_body:
+        rect = pygame.Rect(x * cell_size, y * cell_size, cell_size, cell_size)
+        pygame.draw.rect(screen, green, rect)
+    pygame.draw.rect(screen, red, (food_x * cell_size, food_y * cell_size, cell_size, cell_size))
+
+    pygame.display.update()
+    clock.tick(snake_speed)
+
+pygame.quit()
