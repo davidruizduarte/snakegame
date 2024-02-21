@@ -1,4 +1,5 @@
 Clásico Juego de la Serpiente que se muerde la cola.
+---------------------------------------------------------
 
 ![](https://github.com/davidruizduarte/snakegame/blob/main/snake%20game.jpg) 
 
